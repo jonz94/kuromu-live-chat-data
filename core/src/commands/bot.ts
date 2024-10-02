@@ -2,6 +2,40 @@ import { defineCommand } from 'citty'
 import { YTNodes } from 'youtubei.js'
 import { createInnertubeClient } from '~/utils'
 
+function parseAddChatItemAction(action: YTNodes.AddChatItemAction) {
+  const addChatItemAction = action.as(YTNodes.AddChatItemAction)
+  const item = addChatItemAction.item
+
+  switch (item.type) {
+    case YTNodes.LiveChatTextMessage.type: {
+      const liveChatTextMessage = item.as(YTNodes.LiveChatTextMessage)
+
+      const { id, name } = liveChatTextMessage.author
+
+      if (['UCU84jPD1WgM1-CY9w3m5cBQ', 'UCkyrv7Bv3J8-iOj4oDKiIFg'].includes(id)) {
+        console.log('⚠️⚠️⚠️')
+        console.log(`⚠️⚠️⚠️ 偵測到偽裝 VTuber 的假帳號【${name}】`)
+        console.log('⚠️⚠️⚠️')
+      }
+
+      break
+    }
+
+    case YTNodes.LiveChatMembershipItem.type:
+    case YTNodes.LiveChatPaidMessage.type:
+    case YTNodes.LiveChatPaidSticker.type:
+    case YTNodes.LiveChatSponsorshipsGiftPurchaseAnnouncement.type:
+    case YTNodes.LiveChatSponsorshipsGiftRedemptionAnnouncement.type:
+    case YTNodes.LiveChatViewerEngagementMessage.type:
+      // do nothing
+      break
+
+    default:
+      console.log(`🚧 [${YTNodes.LiveChatTextMessage.type}] ${item.type}`)
+      break
+  }
+}
+
 export default defineCommand({
   meta: {
     name: 'bot',
@@ -108,6 +142,10 @@ export default defineCommand({
     })
 
     livechat.on('chat-update', async (action) => {
+      // if (action.is(YTNodes.AddChatItemAction)) {
+      //   parseAddChatItemAction(action)
+      // }
+
       if (!action.is(YTNodes.AddBannerToLiveChatCommand)) {
         return
       }
